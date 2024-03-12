@@ -3,9 +3,7 @@ const router = express.Router()
 
 const admin = require('./modules/admin')
 
-
 const restController = require('../controllers/restaurant-controller') // 載入 controller
-
 
 router.use('/admin', admin)
 

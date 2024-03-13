@@ -12,6 +12,8 @@
   <main role="main">
     <div class="album bg-light pt-5">
       <div class="container">
+        {{> messages}}  {{!-- 使用雙花括與>符號, 載入 handlebars 的 partials --}}
+
         {{{body}}}
       </div>
     </div>

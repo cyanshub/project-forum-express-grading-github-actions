@@ -2,6 +2,7 @@ const express = require('express')
 const handlebars = require('express-handlebars')
 const flash = require('connect-flash')
 const session = require('express-session')
+const passport = require('./config/passport')
 
 const routes = require('./routes')
 
@@ -17,6 +18,9 @@ app.set('view engine', 'hbs')
 app.use(express.urlencoded({ extended: true }))
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(flash())
+
+app.use(passport.initialize()) // 初始化 passport
+app.use(passport.session())// 啟動 passport 的 session 功能 (必須放在加入 session() 之後)
 
 // 參數沒有特別指定路徑, 代表所有路由都會進入這個 middleware
 app.use((req, res, next) => {

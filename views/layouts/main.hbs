@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="h-100">
 
 <head>
   <meta charset="utf-8">
@@ -8,16 +8,18 @@
   <title>餐廳評論網</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<body>
-  <main role="main">
-    <div class="album bg-light pt-5">
-      <div class="container">
+<body class="d-flex flex-column h-100 bg-light">
+  {{> header}}
+  <main class="flex-shrink-0" role="main">
+    <div class="album container pt-5">
+      <div class="pt-5">
         {{> messages}}  {{!-- 使用雙花括與>符號, 載入 handlebars 的 partials --}}
 
         {{{body}}}
       </div>
     </div>
   </main>
+  {{> footer}}
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
 </body>

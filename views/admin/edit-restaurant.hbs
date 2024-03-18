@@ -1,6 +1,6 @@
-<form action="/admin/restaurants" method="POST">
+<form action="/admin/restaurants/{{restaurant.id}}?_method=PUT" method="POST">
   <div class="mb-4 text-center">
-    <h1 class="h3 font-weight-normal mb-3">Create Restaurant</h1>
+    <h1 class="h3 font-weight-normal mb-3">Edit Restaurant</h1>
   </div>
 
   {{!-- 改成引用 partial, 實現 create 與 edit 頁面共用 --}}

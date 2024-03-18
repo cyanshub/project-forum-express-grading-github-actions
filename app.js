@@ -1,5 +1,6 @@
 const express = require('express')
 const handlebars = require('express-handlebars')
+const methodOverride = require('method-override')
 const flash = require('connect-flash')
 const session = require('express-session')
 const passport = require('./config/passport')
@@ -17,6 +18,8 @@ const SESSION_SECRET = 'secret'
 app.engine('hbs', handlebars({ extname: '.hbs', helpers: handlebarsHelpers }))
 // 設定使用 handlebars 作為樣板引擎
 app.set('view engine', 'hbs')
+
+app.use(methodOverride('_method')) // 使用 method-override
 
 app.use(express.urlencoded({ extended: true }))
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))

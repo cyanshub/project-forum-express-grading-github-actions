@@ -8,12 +8,12 @@ const restController = require('../controllers/restaurant-controller')
 const userController = require('../controllers/user-controller')
 
 // 載入處理身分驗證的 middleware
-const { authenticated } = require('../middleware/auth')
+const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 // 載入處理錯誤的 middleware
 const { generalErrorHandler } = require('../middleware/error-handler')
 
-router.use('/admin', admin)
+router.use('/admin', authenticatedAdmin, admin)
 router.get('/signup', userController.signUpPage)
 router.post('/signup', userController.signUp)
 

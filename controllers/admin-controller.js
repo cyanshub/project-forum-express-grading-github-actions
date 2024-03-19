@@ -1,5 +1,6 @@
 // 載入操作資料表的 model
 const { Restaurant } = require('../models')
+const { localFileHandler } = require('../helpers/file-helpers')
 
 const adminController = {
   getRestaurants: (req, res, next) => {
@@ -16,13 +17,20 @@ const adminController = {
     const { name, tel, address, openingHours, description } = req.body
     // 因為 name 設定為必填, 故設定檢驗條件
     if (!name) throw new Error('Restaurant name is required!')
-    return Restaurant.create({
-      name,
-      tel,
-      address,
-      openingHours,
-      description
-    })
+
+    // 處理 multer 傳入的檔案
+    const file = req.file
+    return localFileHandler(file)
+      .then(filePath => {
+        Restaurant.create({
+          name,
+          tel,
+          address,
+          openingHours,
+          description,
+          image: filePath || null
+        })
+      })
       .then(() => {
         req.flash('success_messages', 'restaurant was successfully created!')
         res.redirect('/admin/restaurants')
@@ -50,19 +58,28 @@ const adminController = {
     // 因為 name 設定為必填, 故設定檢驗條件
     if (!name) throw new Error('Restaurant name is required!')
 
-    return Restaurant.findByPk(req.params.id)
-      .then(restaurant => {
+    // 處理 multer 傳入的檔案
+    const file = req.file
+
+    // 使用 Promise.all 語法, 待所有非同步事件處理完才跳入下一個.then()
+    // Promise.all([非同步A, 非同步B]).then(([A結果, B結果]) => {...})
+    Promise.all([
+      Restaurant.findByPk(req.params.id),
+      localFileHandler(file)
+    ])
+      .then(([restaurant, filePath]) => {
         if (!restaurant) throw new Error("Restaurant didn't exist!")
         return restaurant.update({
           name,
           tel,
           address,
           openingHours,
-          description
+          description,
+          image: filePath || restaurant.image
         })
       })
       .then(() => {
-        req.flash('success_messages', 'restaurant was successfully to update!')
+        req.flash('success_messages', 'restaurant was successfully updated!')
         res.redirect('/admin/restaurants')
       })
       .catch(err => next(err))

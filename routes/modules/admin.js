@@ -14,6 +14,10 @@ router.get('/restaurants/:id/edit', adminController.editRestaurant)
 router.put('/restaurants/:id', upload.single('image'), adminController.putRestaurant)
 router.delete('/restaurants/:id', adminController.deleteRestaurant)
 
+// 第一次作業的部分
+router.get('/users', adminController.getUsers)
+router.patch('/users/:id', adminController.patchUser)
+
 router.use('/', (req, res) => res.redirect('/admin/restaurants'))
 
 module.exports = router

@@ -24,6 +24,7 @@ router.get('/logout', userController.logout)
 // 在路由加入身分驗證的 middleware
 router.get('/restaurants', authenticated, restController.getRestaurants)
 router.get('/restaurants/:id', authenticated, restController.getRestaurant)
+router.get('/restaurants/:id/dashboard', authenticated, restController.getDashboard)
 
 router.get('/', (req, res) => res.redirect('/restaurants'))
 

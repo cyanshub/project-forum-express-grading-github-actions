@@ -23,6 +23,8 @@ router.get('/logout', userController.logout)
 
 // 在路由加入身分驗證的 middleware
 router.get('/restaurants', authenticated, restController.getRestaurants)
+router.get('/restaurants/:id', authenticated, restController.getRestaurant)
+
 router.get('/', (req, res) => res.redirect('/restaurants'))
 
 router.use('/', generalErrorHandler)

@@ -3,17 +3,30 @@ const { Restaurant, Category } = require('../models')
 
 const restaurantController = {
   getRestaurants: (req, res, next) => {
-    return Restaurant.findAll({
-      raw: true,
-      include: [Category],
-      nest: true
-    })
-      .then(restaurants => {
+    const categoryId = Number(req.query.categoryId) || ''
+    return Promise.all([
+      Restaurant.findAll({
+        raw: true,
+        where: {
+          // 展開運算子的優先級較低, 會比較慢判斷
+          // 若 categoryId 存在, 則展開 {categoryId}; 若不存在則展開 {}
+          ...categoryId ? { categoryId } : {}
+        },
+        include: [Category],
+        nest: true
+      }),
+      Category.findAll({ raw: true })
+    ])
+      .then(([restaurants, categories]) => {
         const data = restaurants.map(r => ({
           ...r,
           description: r.description.substring(0, 50)
         }))
-        return res.render('restaurants', { restaurants: data })
+        return res.render('restaurants', {
+          restaurants: data,
+          categories,
+          categoryId
+        })
       })
       .catch(err => next(err))
   },

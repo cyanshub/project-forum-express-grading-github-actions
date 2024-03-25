@@ -1,5 +1,5 @@
 // 載入操作資料表所需的 Model
-const { Restaurant, Category } = require('../models')
+const { Restaurant, Category, Comment, User } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 
 const restaurantController = {
@@ -40,15 +40,18 @@ const restaurantController = {
   },
   getRestaurant: (req, res, next) => {
     return Restaurant.findByPk(req.params.id, {
-      include: [Category] // 拿出關聯的 Category model
+      include: [
+        Category, // 拿出關聯的 Category model
+        { model: Comment, as: 'Comments', include: User } // 拿出關聯的 Comment model
+      ],
+      order: [[Comment, 'createdAt', 'DESC']]
     })
       .then(restaurant => {
         if (!restaurant) throw new Error("Restaurant didn't exist!")
         // 每次查詢時, 使資料的 viewCounts + 1
-        restaurant.increment('viewCounts', { by: 1 })
-        return restaurant.toJSON()
+        return restaurant.increment('viewCounts', { by: 1 })
       })
-      .then(restaurant => res.render('restaurant', { restaurant }))
+      .then(restaurant => res.render('restaurant', { restaurant: restaurant.toJSON() }))
       .catch(err => next(err))
   },
   getDashboard: (req, res, next) => {

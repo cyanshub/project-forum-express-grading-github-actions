@@ -42,7 +42,7 @@ const restaurantController = {
     return Restaurant.findByPk(req.params.id, {
       include: [
         Category, // 拿出關聯的 Category model
-        { model: Comment, as: 'Comments', include: User } // 拿出關聯的 Comment model
+        { model: Comment, include: User } // 拿出關聯的 Comment model
       ],
       order: [[Comment, 'createdAt', 'DESC']]
     })
@@ -55,16 +55,22 @@ const restaurantController = {
       .catch(err => next(err))
   },
   getDashboard: (req, res, next) => {
-    // res.render('restaurant-dashboard')
-    return Restaurant.findByPk(req.params.id, {
-      raw: true,
-      include: [Category],
-      nest: true
-    })
-      .then(restaurant => {
-        if (!restaurant) throw new Error("Restaurant didn't exist!")
-        res.render('restaurant-dashboard', { restaurant })
+    return Promise.all([
+      Restaurant.findByPk(req.params.id, {
+        include: [Category]
+      }),
+      Comment.findAndCountAll({
+        where: { restaurantId: req.params.id }
       })
+    ])
+      .then(([restaurant, comments]) => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        if (!comments) throw new Error('該餐廳尚無評論!')
+        return restaurant.update({
+          commentCounts: comments.count
+        })
+      })
+      .then(restaurant => res.render('restaurant-dashboard', { restaurant: restaurant.toJSON() }))
       .catch(err => next(err))
   }
 }

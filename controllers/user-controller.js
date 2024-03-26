@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const db = require('../models')
 const { localFileHandler } = require('../helpers/file-helpers')
-const { User } = db
+const { User, Comment, Restaurant } = db
 
 const userController = {
   signUpPage: (req, res) => {
@@ -43,10 +43,18 @@ const userController = {
     res.redirect('/signin')
   },
   getUser: (req, res, next) => {
-    return User.findByPk(req.params.id, { raw: true })
+    return User.findByPk(req.params.id, {
+      include: [{ model: Comment, include: [Restaurant] }]
+    })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
-        return res.render('profile', { user })
+        // 直接拿取使用者關聯評論: 先不要使用 raw:true, 因為 user在傳入樣板時會先整理乾淨, 要在傳入樣板前拿取關聯資料; !? 透過關聯拿取的物件實例無法整理乾淨, 故觀察 console.log, 使用.dataValue拿資料;
+        const userComments = user.Comments ? user.Comments : []
+
+        return res.render('profile', {
+          user: user.toJSON(),
+          userComments
+        })
       })
       .catch(err => next(err))
   },

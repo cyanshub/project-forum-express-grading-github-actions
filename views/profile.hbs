@@ -1,3 +1,4 @@
+{{!-- 使用者資訊 --}}
 <div class="card mb-3">
   <div class="row g-0">
     <div class="col-md-4">
@@ -11,5 +12,24 @@
           <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
       </div>
     </div>
+  </div>
+</div>
+
+{{!-- 使用者評論過餐廳 --}}
+<div class="card">
+  <div class="card-header">
+    {{#if userComments}}
+    已評論餐廳: {{userComments.length}}家
+    {{else}}目前尚未評論餐廳...
+    {{/if}}
+  </div>
+  <div class="card-body d-flex flex-row bd-highlight align-items-center flex-wrap"
+    style="background: white; height: auto; cursor:pointer">
+    {{#each userComments}}
+    <a href="/restaurants/{{this.dataValues.restaurantId}}">
+      <img src="{{this.dataValues.Restaurant.dataValues.image}}" class="img-thumbnail ms-1"
+        style="max-width: 150px; max-height: 150px;" alt="{{this.dataValues.Restaurant.dataValues.name}}">
+    </a>
+    {{/each}}
   </div>
 </div>

@@ -1,0 +1,16 @@
+<form action="/users/{{user.id}}?_method=PUT" method="post" enctype="multipart/form-data">
+  {{!-- 名稱控制項 --}}
+  <div class="form-row mb-3">
+    <label class="form-label" for="name">Name</label>
+    <input class="form-control" type="text" name="name" id="name" placeholder="Enter name" value="{{user.name}}"
+      required>
+  </div>
+  {{!-- 圖片控制項 --}}
+  <div class="form-row mb-3">
+    <label class="form-label" for="image">Image</label>
+    <input class="form-control" type="file" class="form-control-file" id="image" name="image">
+  </div>
+  {{!-- 按鈕 --}}
+  <button type="submit" class="btn btn-primary">Submit</button>
+  <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
+</form>

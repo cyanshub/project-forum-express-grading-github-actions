@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const db = require('../models')
+const { localFileHandler } = require('../helpers/file-helpers')
 const { User } = db
 
 const userController = {
@@ -40,6 +41,46 @@ const userController = {
     req.flash('success_messages', '登出成功!')
     req.logout()
     res.redirect('/signin')
+  },
+  getUser: (req, res, next) => {
+    return User.findByPk(req.params.id, { raw: true })
+      .then(user => {
+        if (!user) throw new Error('使用者不存在!')
+        return res.render('profile', { user })
+      })
+      .catch(err => next(err))
+  },
+  editUser: (req, res, next) => {
+    return User.findByPk(req.params.id, { raw: true })
+      .then(user => {
+        if (!user) throw new Error('使用者不存在!')
+        return res.render('edit-user', { user })
+      })
+      .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    // 使用者只能編輯自己的資料: 比對傳入的id 與 passport的id
+    if (Number(req.params.id) !== req.user.id) throw new Error('只能編輯自己的使用者資料!')
+    const { name } = req.body
+    if (!name.trim()) throw new Error('需要輸入使用者名稱!')
+    const file = req.file // 拿取 middleware 傳過來的檔案
+    return Promise.all([
+      User.findByPk(req.params.id),
+      localFileHandler(file) // 將圖案寫入指定資料夾, 並回傳圖檔路徑
+    ])
+      .then(([user, filePath]) => {
+      // 檢查使用者是否存在
+        if (!user) throw new Error('使用者不存在!')
+        user.update({
+          name,
+          image: filePath || user.image
+        })
+      })
+      .then(() => {
+        req.flash('success_messages', '成功變更使用者資訊!')
+        res.redirect(`/users/${req.params.id}`)
+      })
+      .catch(err => next(err))
   }
 }
 

@@ -11,6 +11,9 @@ const commentController = require('../controllers/comment-controller')
 // 載入處理身分驗證的 middleware
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
+// 處理圖片上傳的 middleware
+const upload = require('../middleware/multer')
+
 // 載入處理錯誤的 middleware
 const { generalErrorHandler } = require('../middleware/error-handler')
 
@@ -29,6 +32,11 @@ router.get('/restaurants/:id/dashboard', authenticated, restController.getDashbo
 
 router.post('/comments', authenticated, commentController.postComment)
 router.delete('/comments/:id', authenticated, commentController.deleteComment)
+
+// R03作業: 瀏覽與編輯使用者資訊
+router.get('/users/:id', authenticated, userController.getUser)
+router.get('/users/:id/edit', authenticated, userController.editUser)
+router.put('/users/:id', authenticated, upload.single('image'), userController.putUser)
 
 router.get('/', (req, res) => res.redirect('/restaurants'))
 

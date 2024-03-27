@@ -2,6 +2,8 @@
 <h1>最新動態</h1>
 <hr />
 <div class="row mt-5">
+
+  {{!-- 餐廳區 --}}
   <div class="col-md-6">
     <div class="card">
       <div class="card-header">
@@ -11,10 +13,14 @@
         {{#each restaurants}}
         <div>
           <h4>
-            <a class="link-primary" href="/restaurants/{{this.id}}">{{this.name}}</a>
-            <small class="fs-6">[{{this.Category.name}}]</small>
+            <a class="link-primary" href="/restaurants/{{this.id}}" style="text-decoration:none;">{{this.name}}</a>
+            <a href="/restaurants?categoryId={{this.Category.id}}" style="text-decoration:none; color: black">
+            <small class="fs-6">[{{this.Category.name}}]</small></a>
           </h4>
-          <p class="my-4" style="white-space: break-spaces;">{{this.description}}</p>
+          <a href="/restaurants/{{this.id}}">
+            <img class="card-img-top img-fluid" src="{{this.image}}" alt="Card image cap"
+              style="transition: opacity 0.5s; opacity:0;" onload="this.style.opacity=1;">
+          </a>
           {{relativeTimeFromNow this.createdAt}}
           <hr>
         </div>
@@ -22,6 +28,8 @@
       </div>
     </div>
   </div>
+
+  {{!-- 評論區 --}}
   <div class="col-md-6">
     <div class="card">
       <div class="card-header">
@@ -31,11 +39,21 @@
         {{#each comments}}
         <div>
           <h4>
-            <a class="link-primary" href="/restaurants/{{this.Restaurant.id}}">{{this.Restaurant.name}}</a>
+            <a class="link-primary" href="/restaurants/{{this.Restaurant.id}}" style="text-decoration:none;">{{this.Restaurant.name}}</a>
           </h4>
-          <p class="my-4" style="white-space: break-spaces;">{{this.text}}</p>
-          - <a class="link-secondary" href="/users/{{this.User.id}}">{{this.User.name}}</a>
-          <small>at {{relativeTimeFromNow this.createdAt}}</small>
+          <div class="row">
+            <div class="col">
+              <a href="/restaurants/{{this.Restaurant.id}}">
+                <img class="img-fluid" src="{{this.Restaurant.image}}" alt="Card image cap"
+                  style="transition: opacity 0.5s; opacity:0;" onload="this.style.opacity=1;">
+              </a>
+            </div>
+            <div class="col">
+              <p class="my-4" style="white-space: break-spaces;">{{this.text}}</p>
+              - <a class="link-secondary" href="/users/{{this.User.id}}">{{this.User.name}}</a>
+              <small>at {{relativeTimeFromNow this.createdAt}}</small>
+            </div>
+          </div>
           <hr>
         </div>
         {{/each}}

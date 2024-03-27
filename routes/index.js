@@ -31,8 +31,13 @@ router.get('/restaurants/feeds', authenticated, restController.getFeeds)
 router.get('/restaurants/:id', authenticated, restController.getRestaurant)
 router.get('/restaurants/:id/dashboard', authenticated, restController.getDashboard)
 
+// 留言功能
 router.post('/comments', authenticated, commentController.postComment)
 router.delete('/comments/:id', authenticated, commentController.deleteComment)
+
+// 收藏功能
+router.post('/favorite/:restaurantId', authenticated, userController.addFavorite)
+router.delete('/favorite/:restaurantId', authenticated, userController.removeFavorite)
 
 // R03作業: 瀏覽與編輯使用者資訊
 router.get('/users/:id', authenticated, userController.getUser)

@@ -48,7 +48,7 @@ const userController = {
     })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
-        // 直接拿取使用者關聯評論: 先不要使用 raw:true, 因為 user在傳入樣板時會先整理乾淨, 要在傳入樣板前拿取關聯資料; !? 透過關聯拿取的物件實例無法整理乾淨, 故觀察 console.log, 使用.dataValue拿資料;
+        // 拿取使用者關聯評論時, 因為是1對多是複數s, 用nest: true時會被壓縮成只有一個; 因此把複數的關聯model轉成變數的形式, 並且 觀察 console.log, 使用.dataValue拿資料
         const userComments = user.Comments ? user.Comments : []
 
         return res.render('profile', {

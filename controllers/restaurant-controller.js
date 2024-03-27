@@ -72,6 +72,30 @@ const restaurantController = {
       })
       .then(restaurant => res.render('restaurant-dashboard', { restaurant: restaurant.toJSON() }))
       .catch(err => next(err))
+  },
+  getFeeds: (req, res, next) => {
+    return Promise.all([
+      Restaurant.findAll({
+        limit: 10, // 只取前10筆資料
+        order: [['createdAt', 'DESC']], // 陣列第一個參數可指定關聯model, 若無可省略; 可放入多組陣列
+        include: [Category], // 陣列第一個參數可指定關聯model, 若無可省略; 可放入多組陣列
+        raw: true,
+        nest: true
+      }),
+      Comment.findAll({
+        limit: 10, // 只取前10筆資料
+        order: [['createdAt', 'DESC']],
+        include: [User, Restaurant],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([restaurants, comments]) => {
+        if (!restaurants) throw new Error("restaurants didn't exist")
+        if (!comments) throw new Error("comments didn't exist")
+        return res.render('feeds', { restaurants, comments })
+      })
+      .catch(err => next(err))
   }
 }
 module.exports = restaurantController

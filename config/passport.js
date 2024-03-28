@@ -41,7 +41,9 @@ passport.deserializeUser((id, done) => {
     include: [
       // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
       { model: Restaurant, as: 'FavoritedRestaurants' },
-      { model: Restaurant, as: 'LikedRestaurants' }
+      { model: Restaurant, as: 'LikedRestaurants' },
+      { model: User, as: 'Followers' }, // 關聯追蹤自己的使用者
+      { model: User, as: 'Followings' } // 關聯自己追蹤的使用者
     ]
   })
     .then(user => done(null, user.toJSON())) // 整理 sequelize 打包後的物件

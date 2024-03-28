@@ -26,11 +26,15 @@ const restaurantController = {
     ])
       .then(([restaurants, categories]) => {
         const favoritedRestaurantsId = req.user && req.user.FavoritedRestaurants.map(fr => fr.id)
+        const likedRestaurantsId = req.user && req.user.LikedRestaurants.map(fr => fr.id)
+        console.log('測試:', likedRestaurantsId)
         const data = restaurants.rows.map(r => ({
           ...r,
           description: r.description.substring(0, 50),
-          isFavorited: favoritedRestaurantsId.includes(r.id)
+          isFavorited: favoritedRestaurantsId.includes(r.id),
+          isLiked: likedRestaurantsId.includes(r.id)
         }))
+
         return res.render('restaurants', {
           restaurants: data,
           categories,
@@ -45,7 +49,8 @@ const restaurantController = {
       include: [
         Category, // 拿出關聯的 Category model
         { model: Comment, include: User }, // 拿出關聯的 Comment model
-        { model: User, as: 'FavoritedUsers' } // 拿出關聯的 User model
+        { model: User, as: 'FavoritedUsers' }, // 拿出關聯的 User model
+        { model: User, as: 'LikedUsers' } // 拿出關聯的 User model
       ],
       order: [[Comment, 'createdAt', 'DESC']]
     })
@@ -56,7 +61,8 @@ const restaurantController = {
       })
       .then(restaurant => {
         const isFavorited = restaurant.FavoritedUsers.some(f => f.id === req.user.id)
-        return res.render('restaurant', { restaurant: restaurant.toJSON(), isFavorited })
+        const isLiked = restaurant.LikedUsers.some(f => f.id === req.user.id)
+        return res.render('restaurant', { restaurant: restaurant.toJSON(), isFavorited, isLiked })
       })
       .catch(err => next(err))
   },

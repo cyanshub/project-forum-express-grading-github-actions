@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const db = require('../models')
 const { localFileHandler } = require('../helpers/file-helpers')
-const { User, Comment, Restaurant, Favorite } = db
+const { User, Comment, Restaurant, Favorite, Like } = db
 
 const userController = {
   signUpPage: (req, res) => {
@@ -129,6 +129,49 @@ const userController = {
         if (!restaurant) throw new Error('該餐廳不存在!')
         if (!favorite) throw new Error('並未收藏此餐廳')
         favorite.destroy()
+      })
+      .then(() => res.redirect('back'))
+      .catch(err => next(err))
+  },
+  addLike: (req, res, next) => {
+    const restaurantId = req.params.restaurantId
+    const userId = req.user.id
+    return Promise.all([
+      Restaurant.findByPk(restaurantId),
+      Like.findOne({
+        where: {
+          restaurantId,
+          userId
+        }
+      })
+    ])
+      .then(([restaurant, like]) => {
+        if (!restaurant) throw new Error('該餐廳不存在!')
+        if (like) throw new Error('已對該餐廳點擊喜歡!')
+        return Like.create({
+          restaurantId,
+          userId
+        })
+      })
+      .then(() => res.redirect('back'))
+      .catch(err => next(err))
+  },
+  removeLike: (req, res, next) => {
+    const restaurantId = req.params.restaurantId
+    const userId = req.user.id
+    return Promise.all([
+      Restaurant.findByPk(restaurantId),
+      Like.findOne({
+        where: {
+          restaurantId,
+          userId
+        }
+      })
+    ])
+      .then(([restaurant, like]) => {
+        if (!restaurant) throw new Error('該餐廳不存在!')
+        if (!like) throw new Error('並未對該餐廳點擊喜歡!')
+        return like.destroy()
       })
       .then(() => res.redirect('back'))
       .catch(err => next(err))

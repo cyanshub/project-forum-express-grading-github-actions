@@ -39,7 +39,9 @@ passport.deserializeUser((id, done) => {
   // 操作資料庫, 依存放在 passport 的 id 從資料庫取出物件
   User.findByPk(id, {
     include: [
-      { model: Restaurant, as: 'FavoritedRestaurants' } // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
+      // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
+      { model: Restaurant, as: 'FavoritedRestaurants' },
+      { model: Restaurant, as: 'LikedRestaurants' }
     ]
   })
     .then(user => done(null, user.toJSON())) // 整理 sequelize 打包後的物件

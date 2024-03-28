@@ -2,8 +2,7 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
-const db = require('../models')
-const User = db.User
+const { User, Restaurant } = require('../models')
 
 // 設置本地的登入策略 Set up passport strategy
 passport.use(new LocalStrategy({
@@ -34,15 +33,17 @@ passport.use(new LocalStrategy({
 passport.serializeUser((user, done) => {
   done(null, user.id)
 })
+
 // 反序列化
 passport.deserializeUser((id, done) => {
   // 操作資料庫, 依存放在 passport 的 id 從資料庫取出物件
-  User.findByPk(id)
-    .then(user => {
-      user = user.toJSON() // 整理 sequelize 打包後的物件
-      // console.log(user)
-      return done(null, user)
-    })
+  User.findByPk(id, {
+    include: [
+      { model: Restaurant, as: 'FavoritedRestaurants' } // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
+    ]
+  })
+    .then(user => done(null, user.toJSON())) // 整理 sequelize 打包後的物件
+    .catch(err => done(err))
 })
 
 module.exports = passport

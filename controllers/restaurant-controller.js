@@ -25,9 +25,11 @@ const restaurantController = {
       Category.findAll({ raw: true })
     ])
       .then(([restaurants, categories]) => {
+        const favoritedRestaurantsId = req.user && req.user.FavoritedRestaurants.map(fr => fr.id)
         const data = restaurants.rows.map(r => ({
           ...r,
-          description: r.description.substring(0, 50)
+          description: r.description.substring(0, 50),
+          isFavorited: favoritedRestaurantsId.includes(r.id)
         }))
         return res.render('restaurants', {
           restaurants: data,
@@ -42,7 +44,8 @@ const restaurantController = {
     return Restaurant.findByPk(req.params.id, {
       include: [
         Category, // 拿出關聯的 Category model
-        { model: Comment, include: User } // 拿出關聯的 Comment model
+        { model: Comment, include: User }, // 拿出關聯的 Comment model
+        { model: User, as: 'FavoritedUsers' } // 拿出關聯的 User model
       ],
       order: [[Comment, 'createdAt', 'DESC']]
     })
@@ -51,7 +54,10 @@ const restaurantController = {
         // 每次查詢時, 使資料的 viewCounts + 1
         return restaurant.increment('viewCounts', { by: 1 })
       })
-      .then(restaurant => res.render('restaurant', { restaurant: restaurant.toJSON() }))
+      .then(restaurant => {
+        const isFavorited = restaurant.FavoritedUsers.some(f => f.id === req.user.id)
+        return res.render('restaurant', { restaurant: restaurant.toJSON(), isFavorited })
+      })
       .catch(err => next(err))
   },
   getDashboard: (req, res, next) => {

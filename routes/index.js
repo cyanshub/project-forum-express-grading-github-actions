@@ -43,6 +43,10 @@ router.delete('/favorite/:restaurantId', authenticated, userController.removeFav
 router.post('/like/:restaurantId', authenticated, userController.addLike)
 router.delete('/like/:restaurantId', authenticated, userController.removeLike)
 
+// 追蹤使用者功能
+router.post('/following/:userId', authenticated, userController.addFollowing)
+router.delete('/following/:userId', authenticated, userController.removeFollowing)
+
 // 使用者相關
 router.get('/users/top', authenticated, userController.getTopUsers)
 router.get('/users/:id', authenticated, userController.getUser)

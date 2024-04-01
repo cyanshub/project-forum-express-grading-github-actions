@@ -175,6 +175,21 @@ const userController = {
       })
       .then(() => res.redirect('back'))
       .catch(err => next(err))
+  },
+  getTopUsers: (req, res, next) => {
+    return User.findAll({
+      include: [{ model: User, as: 'Followers' }] // 取出追蹤此user的人
+    })
+      .then(users => {
+        users = users.map(user => ({ // 傳入的 map 函式記得用小括號包住
+          ...user.toJSON(), // 使用展開運算子倒入 map 函式傳入的 user 屬性
+          followerCount: user.Followers.length, // 傳入的使用者與其追隨自己的數量
+          isFollowed: req.user.Followings.some(f => f.id === user.id)
+          // 判斷目前登入的使用者帳戶的追蹤者名單是否包含傳入的使用者
+        }))
+        return res.render('top-users', { users: users })
+      })
+      .catch(err => next(err))
   }
 }
 

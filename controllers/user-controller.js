@@ -48,13 +48,12 @@ const userController = {
     })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
-        // 拿取使用者關聯評論時, 因為是1對多是複數s, 用nest: true時會被壓縮成只有一個; 因此把複數的關聯model轉成變數的形式, 並且 觀察 console.log, 使用.dataValue拿資料
-        const userComments = user.Comments ? user.Comments : []
-
-        return res.render('profile', {
-          user: user.toJSON(),
-          userComments
-        })
+        user.Comments = user.Comments.map(comment => ({
+          // 整理 user.Comments 資料
+          ...comment.toJSON()
+        }))
+        user = user.toJSON() // 整理 user 資料
+        return res.render('profile', { user })
       })
       .catch(err => next(err))
   },

@@ -44,12 +44,17 @@ const userController = {
   },
   getUser: (req, res, next) => {
     return User.findByPk(req.params.id, {
-      include: [{ model: Comment, include: [Restaurant] }]
+      include: [
+        { model: Comment, include: [Restaurant] },
+        { model: Restaurant, as: 'FavoritedRestaurants' },
+        { model: User, as: 'Followings' }, // 訂閱別人
+        { model: User, as: 'Followers' } // 粉絲
+      ]
     })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
+        // 整理 user.Comments 資料
         user.Comments = user.Comments.map(comment => ({
-          // 整理 user.Comments 資料
           ...comment.toJSON()
         }))
         user = user.toJSON() // 整理 user 資料

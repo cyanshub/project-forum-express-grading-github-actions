@@ -68,13 +68,13 @@ const restaurantController = {
   },
   getDashboard: (req, res, next) => {
     return Restaurant.findByPk(req.params.id, {
-      include: [Category, Comment]
+      include: [Category, Comment, { model: User, as: 'FavoritedUsers' }]
     })
       .then(restaurant => {
         if (!restaurant) throw new Error("Restaurant didn't exist!")
-        const restaurantComments = restaurant.Comments ? restaurant.Comments : []
         return restaurant.update({
-          commentCounts: restaurantComments.length // 評論數
+          commentCounts: restaurant.Comments ? restaurant.Comments.length : [], // 評論數
+          favoriteCounts: restaurant.FavoritedUsers ? restaurant.FavoritedUsers.length : [] // 收藏數
         })
       })
       .then(restaurant => res.render('restaurant-dashboard', { restaurant: restaurant.toJSON() }))
@@ -101,6 +101,25 @@ const restaurantController = {
         if (!restaurants) throw new Error("restaurants didn't exist")
         if (!comments) throw new Error("comments didn't exist")
         return res.render('feeds', { restaurants, comments })
+      })
+      .catch(err => next(err))
+  },
+  getTopRestaurants: (req, res, next) => {
+    return Restaurant.findAll({
+      include: [{ model: User, as: 'FavoritedUsers' }],
+      limit: 10, // 只取前10筆資料
+      order: [['favoriteCounts', 'DESC'], ['id', 'ASC']] // 依 favoriteCounts 降冪排列
+    })
+      .then(restaurants => {
+        if (!restaurants) throw new Error("restaurants didn't exist")
+        const results = restaurants.map(restaurant => ({
+          ...restaurant.toJSON(), // toJSON無法針對陣列, 只能針對單個物件
+          isFavorited: restaurant.FavoritedUsers.some(f => f.id === req.user.id)
+        }))
+
+        return res.render('top-restaurants', {
+          restaurants: results
+        })
       })
       .catch(err => next(err))
   }

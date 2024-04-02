@@ -94,7 +94,10 @@ const userController = {
     const userId = req.user.id
     const restaurantId = req.params.restaurantId
     return Promise.all([
-      Restaurant.findByPk(restaurantId),
+      Restaurant.findByPk(restaurantId, {
+        // 取出關聯 model, 更新收藏數
+        include: [{ model: User, as: 'FavoritedUsers' }]
+      }),
       Favorite.findOne({
         where: {
           userId,
@@ -105,9 +108,13 @@ const userController = {
       .then(([restaurant, favorite]) => {
         if (!restaurant) throw new Error('該餐廳不存在!')
         if (favorite) throw new Error('已收藏過此餐廳!') // 檢查若能在join table 找到對應關係代表已經收藏過
-        return Favorite.create({
+        Favorite.create({
           userId,
           restaurantId
+        })
+        return restaurant.update({
+          // 新增收藏時, 追蹤數 + 1
+          favoriteCounts: restaurant.FavoritedUsers.length + 1
         })
       })
       .then(() => res.redirect('back'))
@@ -117,7 +124,10 @@ const userController = {
     const userId = req.user.id
     const restaurantId = req.params.restaurantId
     return Promise.all([
-      Restaurant.findByPk(restaurantId),
+      Restaurant.findByPk(restaurantId, {
+        // 取出關聯 model, 更新收藏數
+        include: [{ model: User, as: 'FavoritedUsers' }]
+      }),
       Favorite.findOne({
         where: {
           userId,
@@ -129,6 +139,10 @@ const userController = {
         if (!restaurant) throw new Error('該餐廳不存在!')
         if (!favorite) throw new Error('並未收藏此餐廳')
         favorite.destroy()
+        return restaurant.update({
+          // 移除收藏時, 追蹤數 - 1
+          favoriteCounts: restaurant.FavoritedUsers.length < 1 ? 0 : restaurant.FavoritedUsers.length - 1 // 防護機制
+        })
       })
       .then(() => res.redirect('back'))
       .catch(err => next(err))

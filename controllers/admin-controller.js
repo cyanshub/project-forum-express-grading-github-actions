@@ -17,6 +17,7 @@ const adminController = {
         limit,
         raw: true,
         nest: true,
+        order: [['id', 'DESC']],
         include: [Category] // 查資料時, 由 include 把有關資料資料一併帶出
       }),
       Category.findAll({ raw: true })

@@ -20,7 +20,8 @@ const restaurantController = {
         offset,
         limit,
         include: [Category],
-        nest: true
+        nest: true,
+        order: [['id', 'DESC']]
       }),
       Category.findAll({ raw: true })
     ])

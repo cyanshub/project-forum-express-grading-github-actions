@@ -6,7 +6,11 @@ module.exports = (sequelize, DataTypes) => {
   class Category extends Model {
     static associate (models) {
       // define association here
-      Category.hasMany(models.Restaurant, { foreignKey: 'categoryId' })
+      Category.hasMany(models.Restaurant, {
+        foreignKey: 'categoryId',
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE'
+      })
     }
   };
   Category.init({

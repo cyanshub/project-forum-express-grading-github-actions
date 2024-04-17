@@ -1,6 +1,6 @@
 // 載入操作資料表所需的 Model
-const { Restaurant, Category, Comment, User } = require('../models')
-const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { Restaurant, Category, Comment, User } = require('../../models')
+const { getOffset, getPagination } = require('../../helpers/pagination-helper')
 
 const restaurantController = {
   getRestaurants: (req, res, next) => {
@@ -28,7 +28,7 @@ const restaurantController = {
       .then(([restaurants, categories]) => {
         const favoritedRestaurantsId = req.user && req.user.FavoritedRestaurants.map(fr => fr.id)
         const likedRestaurantsId = req.user && req.user.LikedRestaurants.map(fr => fr.id)
-        console.log('測試:', likedRestaurantsId)
+        // console.log('測試:', likedRestaurantsId)
         const data = restaurants.rows.map(r => ({
           ...r,
           description: r.description.substring(0, 50),

@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs') // 載入 bcrypt
-const db = require('../models')
-const { localFileHandler } = require('../helpers/file-helpers')
+const db = require('../../models')
+const { localFileHandler } = require('../../helpers/file-helpers')
 const { User, Comment, Restaurant, Favorite, Like, Followship } = db
 
 const userController = {
@@ -81,7 +81,7 @@ const userController = {
       localFileHandler(file) // 將圖案寫入指定資料夾, 並回傳圖檔路徑
     ])
       .then(([user, filePath]) => {
-      // 檢查使用者是否存在
+        // 檢查使用者是否存在
         if (!user) throw new Error('使用者不存在!')
         user.update({
           name,
@@ -205,7 +205,7 @@ const userController = {
             ...user.toJSON(), // 使用展開運算子倒入 map 函式傳入的 user 屬性
             followerCount: user.Followers.length, // 傳入的使用者與其追隨自己的數量
             isFollowed: req.user.Followings.some(f => f.id === user.id)
-          // 判斷目前登入的使用者帳戶的追蹤者名單是否包含傳入的使用者
+            // 判斷目前登入的使用者帳戶的追蹤者名單是否包含傳入的使用者
           }))
           // 利用.sort箭頭函式排序(a,b): 由大到小 b - a; 由小到大 a - b
           .sort((a, b) => b.followerCount - a.followerCount)

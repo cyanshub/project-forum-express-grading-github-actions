@@ -1,5 +1,5 @@
 // 載入需要操作的資料表 Model
-const { Comment, Restaurant, User } = require('../models')
+const { Comment, Restaurant, User } = require('../../models')
 
 const commentController = {
   postComment: (req, res, next) => {

@@ -1,34 +1,13 @@
 // 載入操作資料表的 model
 const { Restaurant, User, Category } = require('../../models')
 const { localFileHandler } = require('../../helpers/file-helpers')
-const { getOffset, getPagination } = require('../../helpers/pagination-helper')
+
+// 載入共用 controller 的 services 層
+const adminServices = require('../../services/admin-services')
 
 const adminController = {
   getRestaurants: (req, res, next) => {
-    const DEFAULT_LIMIT = 10
-    const categoryId = Number(req.query.categoryId) || ''
-    const page = Number(req.query.page) || 1
-    const limit = Number(req.query.limit) || DEFAULT_LIMIT
-    const offset = getOffset(limit, page)
-    return Promise.all([
-      Restaurant.findAndCountAll({
-        where: { ...categoryId ? { categoryId } : {} },
-        offset,
-        limit,
-        raw: true,
-        nest: true,
-        order: [['id', 'DESC']],
-        include: [Category] // 查資料時, 由 include 把有關資料資料一併帶出
-      }),
-      Category.findAll({ raw: true })
-    ])
-      .then(([restaurants, categories]) => res.render('admin/restaurants', {
-        restaurants: restaurants.rows,
-        categories,
-        categoryId,
-        pagination: getPagination(limit, page, restaurants.count)
-      }))
-      .catch(err => next(err))
+    adminServices.getRestaurants(req, (err, data) => err ? next(err) : res.render('admin/restaurants', data))
   },
   createRestaurant: (req, res, next) => {
     return Category.findAll({

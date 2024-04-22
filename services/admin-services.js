@@ -3,6 +3,7 @@ const { Restaurant, Category } = require('../models')
 
 // 載入所需的工具
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { localFileHandler } = require('../helpers/file-helpers.js')
 
 const adminServices = {
   getRestaurants: (req, cb) => {
@@ -32,6 +33,26 @@ const adminServices = {
 
         })
       })
+      .catch(err => cb(err))
+  },
+  postRestaurant: (req, cb) => {
+    const { name, tel, address, openingHours, description, categoryId } = req.body
+    // 因為 name 設定為必填, 故設定檢驗條件
+    if (!name) throw new Error('Restaurant name is required!')
+
+    // 處理 multer 傳入的檔案
+    const file = req.file
+    return localFileHandler(file)
+      .then(filePath => Restaurant.create({
+        name,
+        tel,
+        address,
+        openingHours,
+        description,
+        image: filePath || null,
+        categoryId
+      }))
+      .then(newRestaurant => cb(null, { restaurant: newRestaurant }))
       .catch(err => cb(err))
   },
   deleteRestaurant: (req, cb) => {

@@ -1,7 +1,12 @@
 // 載入所需套件
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
+const passportJWT = require('passport-jwt')
+const JWTStrategy = passportJWT.Strategy
+const ExtractJWT = passportJWT.ExtractJwt
+
 const bcrypt = require('bcryptjs')
+
 const { User, Restaurant } = require('../models')
 
 // 設置本地的登入策略 Set up passport strategy
@@ -30,12 +35,12 @@ passport.use(new LocalStrategy({
 
 // 序列化與反序列化: 透過 passport 只把物件 id 存在session, 需要時再核對 id 取出整個物件的方法
 // 序列化
-passport.serializeUser((user, done) => {
-  done(null, user.id)
+passport.serializeUser((user, cb) => {
+  cb(null, user.id)
 })
 
 // 反序列化
-passport.deserializeUser((id, done) => {
+passport.deserializeUser((id, cb) => {
   // 操作資料庫, 依存放在 passport 的 id 從資料庫取出物件
   User.findByPk(id, {
     include: [
@@ -46,8 +51,29 @@ passport.deserializeUser((id, done) => {
       { model: User, as: 'Followings' } // 關聯自己追蹤的使用者
     ]
   })
-    .then(user => done(null, user.toJSON())) // 整理 sequelize 打包後的物件
-    .catch(err => done(err))
+    .then(user => cb(null, user.toJSON())) // 整理 sequelize 打包後的物件
+    .catch(err => cb(err))
 })
+
+// 設計 jwt 的登入策略的 options
+const jwtOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET
+}
+
+// 設置 jwt 登入策略
+passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+  User.findByPk(jwtPayload.id, {
+    include: [
+      // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
+      { model: Restaurant, as: 'FavoritedRestaurants' },
+      { model: Restaurant, as: 'LikedRestaurants' },
+      { model: User, as: 'Followers' }, // 關聯追蹤自己的使用者
+      { model: User, as: 'Followings' } // 關聯自己追蹤的使用者
+    ]
+  })
+    .then(user => cb(null, user))
+    .catch(err => cb(err))
+}))
 
 module.exports = passport

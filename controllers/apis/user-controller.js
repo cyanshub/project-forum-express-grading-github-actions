@@ -1,8 +1,3 @@
-// 呼叫取用 dotenv 設定檔
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
-
 // 載入所需工具
 const jwt = require('jsonwebtoken')
 

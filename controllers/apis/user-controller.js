@@ -1,7 +1,11 @@
 // 載入所需工具
 const jwt = require('jsonwebtoken')
+const userServices = require('../../services/user-services')
 
 const userController = {
+  signUp: (req, res, next) => {
+    userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
   signIn: (req, res, next) => {
     // 利用 try catch 處理不是非同步語法的錯誤事件
     try {

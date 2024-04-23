@@ -18,6 +18,7 @@ router.get('/restaurants', authenticated, restController.getRestaurants)
 
 // 登入的路由: 關閉 passport 的 session 功能
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.post('/signup', userController.signUp)
 
 router.use('/', apiErrorHandler)
 

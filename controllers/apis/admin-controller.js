@@ -10,6 +10,18 @@ const adminController = {
   },
   deleteRestaurant: (req, res, next) => {
     adminServices.deleteRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  },
+  getRestaurant: (req, res, next) => {
+    res.send('開發中')
+  },
+  putRestaurant: (req, res, next) => {
+    res.send('開發中')
+  },
+  getUsers: (req, res, next) => {
+    res.send('開發中')
+  },
+  patchUser: (req, res, next) => {
+    res.send('開發中')
   }
 }
 

@@ -21,13 +21,6 @@ const commentController = require('../../controllers/pages/comment-controller')
 // 設計路由:後台區域
 router.use('/admin', authenticatedAdmin, admin)
 
-// 設計路由: 登入相關
-router.get('/signup', userController.signUpPage)
-router.post('/signup', userController.signUp)
-router.get('/signin', userController.signInPage)
-router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
-router.get('/logout', userController.logout)
-
 // 設計路由: 餐廳相關
 router.get('/restaurants', authenticated, restController.getRestaurants)
 router.get('/restaurants/feeds', authenticated, restController.getFeeds)
@@ -41,6 +34,12 @@ router.post('/comments', authenticated, commentController.postComment)
 router.delete('/comments/:id', authenticated, commentController.deleteComment)
 
 // 設計路由: 使用者相關
+router.get('/signup', userController.signUpPage)
+router.post('/signup', userController.signUp)
+router.get('/signin', userController.signInPage)
+router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
+router.get('/logout', userController.logout)
+
 router.post('/favorite/:restaurantId', authenticated, userController.addFavorite)
 router.delete('/favorite/:restaurantId', authenticated, userController.removeFavorite)
 

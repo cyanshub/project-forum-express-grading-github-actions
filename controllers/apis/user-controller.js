@@ -27,6 +27,33 @@ const userController = {
     } catch (err) {
       next(err)
     }
+  },
+  addFavorite: (req, res, next) => {
+    res.send('開發中')
+  },
+  removeFavorite: (req, res, next) => {
+    res.send('開發中')
+  },
+  addLike: (req, res, next) => {
+    res.send('開發中')
+  },
+  removeLike: (req, res, next) => {
+    res.send('開發中')
+  },
+  addFollowing: (req, res, next) => {
+    res.send('開發中')
+  },
+  removeFollowing: (req, res, next) => {
+    res.send('開發中')
+  },
+  getTopUsers: (req, res, next) => {
+    res.send('開發中')
+  },
+  getUser: (req, res, next) => {
+    res.send('開發中')
+  },
+  putUser: (req, res, next) => {
+    res.send('開發中')
   }
 }
 

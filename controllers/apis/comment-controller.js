@@ -1,9 +1,12 @@
+// 載入共用 Serivces 層
+const commentServices = require('../../services/comment-services')
+
 const commentController = {
   postComment: (req, res, next) => {
-    res.sned('開發中')
+    commentServices.postComment(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   deleteComment: (req, res, next) => {
-    res.sned('開發中')
+    commentServices.deleteComment(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

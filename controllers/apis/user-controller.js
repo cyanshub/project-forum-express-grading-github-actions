@@ -29,31 +29,31 @@ const userController = {
     }
   },
   addFavorite: (req, res, next) => {
-    res.send('開發中')
+    userServices.addFavorite(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   removeFavorite: (req, res, next) => {
-    res.send('開發中')
+    userServices.removeFavorite(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   addLike: (req, res, next) => {
-    res.send('開發中')
+    userServices.addLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   removeLike: (req, res, next) => {
-    res.send('開發中')
+    userServices.removeLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   addFollowing: (req, res, next) => {
-    res.send('開發中')
+    userServices.addFollowing(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   removeFollowing: (req, res, next) => {
-    res.send('開發中')
+    userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getTopUsers: (req, res, next) => {
-    res.send('開發中')
+    userServices.getTopUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getUser: (req, res, next) => {
-    res.send('開發中')
+    userServices.getUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   putUser: (req, res, next) => {
-    res.send('開發中')
+    userServices.putUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

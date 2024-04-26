@@ -5,16 +5,16 @@ const restaurantController = {
     restaurantServices.getRestaurants(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getFeeds: (req, res, next) => {
-    res.send('開發中')
+    restaurantServices.getFeeds(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getTopRestaurants: (req, res, next) => {
-    res.send('開發中')
+    restaurantServices.getTopRestaurants(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getRestaurant: (req, res, next) => {
-    res.send('開發中')
+    restaurantServices.getRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getDashboard: (req, res, next) => {
-    res.sned('開發中')
+    restaurantServices.getDashboard(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

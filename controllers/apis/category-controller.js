@@ -1,15 +1,18 @@
+// 載入共用的 services 層
+const categoryServices = require('../../services/category-services')
+
 const categoryController = {
   getCategories: (req, res, next) => {
-    res.send('開發中')
+    categoryServices.getCategories(req, (err, data) => err ? next(err) : res.json(data))
   },
   postCategory: (req, res, next) => {
-    res.send('開發中')
+    categoryServices.postCategory(req, (err, data) => err ? next(err) : res.json(data))
   },
   putCategory: (req, res, next) => {
-    res.send('開發中')
+    categoryServices.putCategory(req, (err, data) => err ? next(err) : res.json(data))
   },
   deleteCategory: (req, res, next) => {
-    res.send('開發中')
+    categoryServices.deleteCategory(req, (err, data) => err ? next(err) : res.json(data))
   }
 }
 

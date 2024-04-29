@@ -1,55 +1,33 @@
-// 載入操作資料表 Model
-const { Category } = require('../../models')
+// 載入共用的 services 層
+const categoryServices = require('../../services/category-services')
+
 const categoryController = {
   getCategories: (req, res, next) => {
-    Promise.all([
-      Category.findAll({ raw: true }),
-      req.params.id ? Category.findByPk(req.params.id, { raw: true }) : null
-    ])
-      .then(([categories, category]) => {
-        res.render('admin/categories', { categories, category })
-      })
-      .catch(err => next(err))
+    categoryServices.getCategories(req, (err, data) => err ? next(err) : res.render('admin/categories', data))
   },
   postCategory: (req, res, next) => {
-    const { name } = req.body
-    // 判斷傳入的類別 name 是否存在
-    if (!name) throw new Error('Category name is required!')
-    return Category.create({ name })
-      .then(() => {
-        req.flash('success_messages', '成功新增類別!')
-        return res.redirect('/admin/categories')
-      })
-      .catch(err => next(err))
+    categoryServices.postCategory(req, (err, data) => {
+      if (err) return next(err)
+      req.flash('success_messages', '成功新增類別!')
+      req.session.newCategory = data
+      return res.redirect('/admin/categories')
+    })
   },
   putCategory: (req, res, next) => {
-    const { name } = req.body
-    // 判斷傳入的類別 name 是否存在
-    if (!name) throw new Error('Category name is required!')
-    return Category.findByPk(req.params.id)
-      .then(category => {
-        // 判斷類別是否存在
-        if (!category) throw new Error('類別不存在!')
-        return category.update({ name })
-      })
-      .then(() => {
-        req.flash('success_messages', '成功更新類別!')
-        return res.redirect('/admin/categories')
-      })
-      .catch(err => next(err))
+    categoryServices.putCategory(req, (err, data) => {
+      if (err) return next(err)
+      req.flash('success_messages', '成功更新類別!')
+      req.session.editedCategory = data
+      return res.redirect('/admin/categories')
+    })
   },
   deleteCategory: (req, res, next) => {
-    return Category.findByPk(req.params.id)
-      .then(category => {
-        // 反查，確認要刪除的類別存在，再進行下面刪除動作
-        if (!category) throw new Error('類別不存在!')
-        return category.destroy()
-      })
-      .then(() => {
-        req.flash('success_messages', '成功刪除類別!')
-        return res.redirect('/admin/categories')
-      })
-      .catch(err => next(err))
+    categoryServices.deleteCategory(req, (err, data) => {
+      if (err) return next(err)
+      req.flash('success_messages', '成功刪除類別!')
+      req.session.deletedCategory = data
+      return res.redirect('/admin/categories')
+    })
   }
 }
 

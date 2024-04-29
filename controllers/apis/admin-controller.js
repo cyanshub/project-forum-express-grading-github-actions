@@ -12,16 +12,16 @@ const adminController = {
     adminServices.deleteRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getRestaurant: (req, res, next) => {
-    res.send('開發中')
+    adminServices.getRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   putRestaurant: (req, res, next) => {
-    res.send('開發中')
+    adminServices.putRestaurant(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getUsers: (req, res, next) => {
-    res.send('開發中')
+    adminServices.getUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   patchUser: (req, res, next) => {
-    res.send('開發中')
+    adminServices.patchUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

@@ -3,7 +3,7 @@
   "version": "3.0.1",
   "main": "app.js",
   "scripts": {
-    "heroku-postbuild": "npx sequelize db:migrate && npx sequelize db:seed:all",
+    "heroku-postbuild": "npx sequelize db:migrate && sequelize db:seed:undo:all && npx sequelize db:seed:all",
     "start": "node app.js",
     "dev": "nodemon app.js",
     "lint": "eslint \"**/*.js\" --fix",

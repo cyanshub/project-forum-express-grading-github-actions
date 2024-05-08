@@ -17,7 +17,7 @@ const userController = {
 
       // 利用 jwt 來發 token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      res.json({
+      return res.json({
         status: 'success',
         data: {
           token,

@@ -3,18 +3,16 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
+// 載入專案所需檔案
 const path = require('path')
-
 const express = require('express')
 const handlebars = require('express-handlebars')
+const handlebarsHelpers = require('./helpers/handlebars-helpers')
 const methodOverride = require('method-override')
 const flash = require('connect-flash')
 const session = require('express-session')
 const passport = require('./config/passport')
-
-const handlebarsHelpers = require('./helpers/handlebars-helpers')
 const { getUser } = require('./helpers/auth-helpers')
-
 const { pages, apis } = require('./routes')
 
 const app = express()
@@ -23,8 +21,7 @@ const SESSION_SECRET = 'secret'
 
 // 註冊 handlebars 樣板引擎, 並指定副檔名為 .hbs
 app.engine('hbs', handlebars({ extname: '.hbs', helpers: handlebarsHelpers }))
-// 設定使用 handlebars 作為樣板引擎
-app.set('view engine', 'hbs')
+app.set('view engine', 'hbs') // 設定使用 handlebars 作為樣板引擎
 
 app.use(methodOverride('_method')) // 使用 method-override
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
@@ -32,9 +29,8 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(flash())
-
+app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false }))
 app.use(passport.initialize()) // 初始化 passport
 app.use(passport.session()) // 啟動 passport 的 session 功能 (必須放在加入 session() 之後)
 

@@ -8,8 +8,7 @@
   },
   "production": {
     "use_env_variable": "DATABASE_URL",
-    "operatorsAliases": false,
-    "test":"test"
+    "operatorsAliases": false
   },
   "travis": {
     "username": "travis",

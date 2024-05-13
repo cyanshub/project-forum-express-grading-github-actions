@@ -3,10 +3,10 @@ const faker = require('faker')
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const categories = await queryInterface.sequelize.query(
-      'SELECT `id` FROM `Categories`;',
+      'SELECT `id` FROM `categories`;',
       { type: queryInterface.sequelize.QueryTypes.SELECT }
     )
-    await queryInterface.bulkInsert('Restaurants',
+    await queryInterface.bulkInsert('restaurants',
       // Array.from 在一個參數設定 length 指定陣列的長度
       Array.from({ length: 50 }, () => ({
         name: faker.name.findName(),
@@ -22,6 +22,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Restaurants', {})
+    await queryInterface.bulkDelete('restaurants', {})
   }
 }

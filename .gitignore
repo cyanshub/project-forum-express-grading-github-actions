@@ -5,3 +5,4 @@ upload/
 .DS_Store
 .env
 .idea
+mysql_db_backup

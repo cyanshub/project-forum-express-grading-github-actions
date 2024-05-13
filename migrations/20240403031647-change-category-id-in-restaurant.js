@@ -1,12 +1,12 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.changeColumn('restaurants', 'category_id', {
+    await queryInterface.changeColumn('Restaurants', 'category_id', {
       type: Sequelize.INTEGER,
       allowNull: true
     }, {
       references: {
-        model: 'categories',
+        model: 'Categories',
         key: 'id'
       },
       onUpdate: 'CASCADE',
@@ -15,12 +15,12 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.changeColumn('restaurants', 'category_id', {
+    await queryInterface.changeColumn('Restaurants', 'category_id', {
       type: Sequelize.INTEGER,
       allowNull: false
     }, {
       references: {
-        model: 'categories',
+        model: 'Categories',
         key: 'id'
       },
       onUpdate: 'CASCADE',

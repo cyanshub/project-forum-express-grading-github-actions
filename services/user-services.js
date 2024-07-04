@@ -1,6 +1,7 @@
 // 載入專案所需的工具
 const bcrypt = require('bcryptjs') // 載入 bcrypt
 const { localFileHandler } = require('../helpers/file-helpers')
+const { filterUnique } = require('../helpers/array-helpers')
 
 // 載入所需的資料表 model
 const { User, Comment, Restaurant, Favorite, Like, Followship } = require('../models')
@@ -204,6 +205,10 @@ const userServices = {
           ...comment.toJSON()
         }))
         user = user.toJSON() // 整理 user 資料
+
+        // 使用重複值過濾演算法: 過濾掉重複的 comment.Restaurant.id
+        user.Comments = filterUnique(user.Comments, ['Restaurant', 'id'])
+
         return cb(null, { user })
       })
       .catch(err => cb(err))

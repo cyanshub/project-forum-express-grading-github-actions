@@ -81,7 +81,7 @@ const restaurantController = {
           favoriteCounts: restaurant.FavoritedUsers ? restaurant.FavoritedUsers.length : [] // 收藏數
         })
       })
-      .then(restaurant => res.render('restaurant-dashboard', { restaurant: restaurant.toJSON() }))
+      .then(restaurant => res.render('dashboard', { restaurant: restaurant.toJSON() }))
       .catch(err => next(err))
   },
   getFeeds: (req, res, next) => {

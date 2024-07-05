@@ -58,15 +58,17 @@ const userController = {
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
         // 整理 user.Comments 資料
-        user.Comments = user.Comments.map(comment => ({
-          ...comment.toJSON()
-        }))
+        user.Comments = user.Comments
+          ? user.Comments.map(comment => ({
+            ...comment.toJSON()
+          }))
+          : null
         user = user.toJSON() // 整理 user 資料
 
         // 使用重複值過濾演算法: 過濾掉重複的 comment.Restaurant.id
-        user.Comments = filterUnique(user.Comments, ['Restaurant', 'id'])
+        user.Comments = user.Comments ? filterUnique(user.Comments, ['Restaurant', 'id']) : null
 
-        return res.render('profile', { user })
+        return res.render('users/profile', { user })
       })
       .catch(err => next(err))
   },
@@ -74,7 +76,7 @@ const userController = {
     return User.findByPk(req.params.id, { raw: true })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
-        return res.render('edit-user', { user })
+        return res.render('users/edit', { user })
       })
       .catch(err => next(err))
   },
@@ -99,7 +101,7 @@ const userController = {
         })
       })
       .then(updatedUser => {
-        req.flash('success_messages', '成功變更使用者資訊!')
+        req.flash('success_messages', '使用者資料編輯成功')
         return res.redirect(`/users/${updatedUser.id}`)
       })
       .catch(err => next(err))

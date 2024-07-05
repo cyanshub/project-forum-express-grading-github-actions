@@ -156,16 +156,15 @@ const adminController = {
         // 檢查使用者是否存在
         if (!user) throw new Error("User didn't exist!")
         if (user.email === 'root@example.com') {
-          const err = new Error('error_messages', '禁止變更 root 使用者權限!')
-          err.status = 404
-          throw err
+          req.flash('error_messages', '禁止變更 root 權限')
+          return res.redirect('back')
         }
         return user.update({
           isAdmin: !user.isAdmin
         })
       })
       .then(editedUser => {
-        req.flash('success_messages', '使用者權限變更成功!')
+        req.flash('success_messages', '使用者權限變更成功')
         return res.redirect('/admin/users')
       })
       .catch(err => next(err))

@@ -1,9 +1,9 @@
 // 載入所需套件
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
-const passportJWT = require('passport-jwt')
-const JWTStrategy = passportJWT.Strategy
-const ExtractJWT = passportJWT.ExtractJwt
+// const passportJWT = require('passport-jwt')
+// const JWTStrategy = passportJWT.Strategy
+// const ExtractJWT = passportJWT.ExtractJwt
 
 const bcrypt = require('bcryptjs')
 
@@ -55,25 +55,25 @@ passport.deserializeUser((id, cb) => {
     .catch(err => cb(err))
 })
 
-// 設計 jwt 的登入策略的 options
-const jwtOptions = {
-  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET
-}
+// // 設計 jwt 的登入策略的 options
+// const jwtOptions = {
+//   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+//   secretOrKey: process.env.JWT_SECRET
+// }
 
-// 設置 jwt 登入策略
-passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
-      { model: Restaurant, as: 'FavoritedRestaurants' },
-      { model: Restaurant, as: 'LikedRestaurants' },
-      { model: User, as: 'Followers' }, // 關聯追蹤自己的使用者
-      { model: User, as: 'Followings' } // 關聯自己追蹤的使用者
-    ]
-  })
-    .then(user => cb(null, user))
-    .catch(err => cb(err))
-}))
+// // 設置 jwt 登入策略
+// passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
+//   User.findByPk(jwtPayload.id, {
+//     include: [
+//       // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
+//       { model: Restaurant, as: 'FavoritedRestaurants' },
+//       { model: Restaurant, as: 'LikedRestaurants' },
+//       { model: User, as: 'Followers' }, // 關聯追蹤自己的使用者
+//       { model: User, as: 'Followings' } // 關聯自己追蹤的使用者
+//     ]
+//   })
+//     .then(user => cb(null, user))
+//     .catch(err => cb(err))
+// }))
 
 module.exports = passport

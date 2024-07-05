@@ -126,7 +126,7 @@ const userController = {
         if (favorite) throw new Error('已收藏過此餐廳!') // 檢查若能在join table 找到對應關係代表已經收藏過
         restaurant.update({
           // 新增收藏時, 追蹤數 + 1
-          favoriteCounts: restaurant.FavoritedUsers.length + 1
+          favoritedCount: restaurant.FavoritedUsers.length + 1
         })
         return Favorite.create({
           userId,
@@ -156,7 +156,7 @@ const userController = {
         if (!favorite) throw new Error('並未收藏此餐廳')
         restaurant.update({
           // 移除收藏時, 追蹤數 - 1
-          favoriteCounts: restaurant.FavoritedUsers.length < 1 ? 0 : restaurant.FavoritedUsers.length - 1 // 防護機制
+          favoritedCount: restaurant.FavoritedUsers.length < 1 ? 0 : restaurant.FavoritedUsers.length - 1 // 防護機制
         })
         return favorite.destroy()
       })

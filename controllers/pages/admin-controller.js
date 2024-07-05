@@ -1,12 +1,39 @@
 // 載入操作資料表的 model
-const { Restaurant, Category } = require('../../models')
+const { Restaurant, Category, User } = require('../../models')
 
-// 載入共用 controller 的 services 層
-const adminServices = require('../../services/admin-services')
+// 載入所需的工具
+const { getOffset, getPagination } = require('../../helpers/pagination-helper')
+const { localFileHandler } = require('../../helpers/file-helpers.js')
 
 const adminController = {
   getRestaurants: (req, res, next) => {
-    adminServices.getRestaurants(req, (err, data) => err ? next(err) : res.render('admin/restaurants', data))
+    const DEFAULT_LIMIT = 10
+    const categoryId = Number(req.query.categoryId) || ''
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || DEFAULT_LIMIT
+    const offset = getOffset(limit, page)
+    return Promise.all([
+      Restaurant.findAndCountAll({
+        where: { ...categoryId ? { categoryId } : {} },
+        offset,
+        limit,
+        raw: true,
+        nest: true,
+        order: [['id', 'DESC']],
+        include: [Category] // 查資料時, 由 include 把有關資料資料一併帶出
+      }),
+      Category.findAll({ raw: true })
+    ])
+      .then(([restaurants, categories]) => {
+        return res.render('admin/restaurants', {
+          restaurants: restaurants.rows,
+          categories,
+          categoryId,
+          pagination: getPagination(limit, page, restaurants.count)
+
+        })
+      })
+      .catch(err => next(err))
   },
   createRestaurant: (req, res, next) => {
     return Category.findAll({
@@ -16,15 +43,39 @@ const adminController = {
       .catch(err => next(err))
   },
   postRestaurant: (req, res, next) => {
-    adminServices.postRestaurant(req, (err, data) => {
-      if (err) return next(err)
-      req.flash('success_messages', 'restaurant was successfully created!')
-      req.session.createdData = data
-      return res.redirect('/admin/restaurants')
-    })
+    const { name, tel, address, openingHours, description, categoryId } = req.body
+    // 因為 name 設定為必填, 故設定檢驗條件
+    if (!name) throw new Error('Restaurant name is required!')
+
+    // 處理 multer 傳入的檔案
+    const file = req.file
+    return localFileHandler(file)
+      .then(filePath => Restaurant.create({
+        name,
+        tel,
+        address,
+        openingHours,
+        description,
+        image: filePath || null,
+        categoryId
+      }))
+      .then(newRestaurant => {
+        req.flash('success_messages', 'restaurant was successfully created!')
+        return res.redirect('/admin/restaurants')
+      })
+      .catch(err => next(err))
   },
   getRestaurant: (req, res, next) => {
-    adminServices.getRestaurant(req, (err, data) => err ? next(err) : res.render('admin/restaurant', data))
+    Restaurant.findByPk(req.params.id, {
+      nest: true,
+      include: [Category],
+      raw: true
+    })
+      .then(restaurant => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        res.render('admin/restaurant', { restaurant })
+      })
+      .catch(err => next(err))
   },
   editRestaurant: (req, res, next) => {
     Promise.all([
@@ -38,30 +89,86 @@ const adminController = {
       .catch(err => { next(err) })
   },
   putRestaurant: (req, res, next) => {
-    adminServices.putRestaurant(req, (err, data) => {
-      if (err) return next(err)
-      req.flash('success_messages', 'restaurant was successfully updated!')
-      req.session.editedData = data
-      return res.redirect('/admin/restaurants')
-    })
+    const { name, tel, address, openingHours, description, categoryId } = req.body
+    // 因為 name 設定為必填, 故設定檢驗條件
+    if (!name) throw new Error('Restaurant name is required!')
+
+    // 處理 multer 傳入的檔案
+    const file = req.file
+
+    // 使用 Promise.all 語法, 待所有非同步事件處理完才跳入下一個.then()
+    // Promise.all([非同步A, 非同步B]).then(([A結果, B結果]) => {...})
+    Promise.all([
+      Restaurant.findByPk(req.params.id),
+      localFileHandler(file)
+    ])
+      .then(([restaurant, filePath]) => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        return restaurant.update({
+          name,
+          tel,
+          address,
+          openingHours,
+          description,
+          image: filePath || restaurant.image,
+          categoryId
+        })
+      })
+      .then(editedRestaurant => {
+        req.flash('success_messages', 'restaurant was successfully updated!')
+        return res.redirect('/admin/restaurants')
+      })
+      .catch(err => next(err))
   },
   deleteRestaurant: (req, res, next) => {
-    adminServices.deleteRestaurant(req, (err, data) => {
-      if (err) return next(err)
-      req.session.deletedData = data
-      return res.redirect('/admin/restaurants')
-    })
+    return Restaurant.findByPk(req.params.id)
+      .then(restaurant => {
+        if (!restaurant) {
+          const err = new Error("Restaurant didn't exist!")
+          err.status = 404
+          throw err
+        }
+        return restaurant.destroy()
+      })
+      .then(deletedRestaurant => {
+        req.flash('success_messages', 'restaurant was successfully deleted!')
+        return res.redirect('/admin/restaurants')
+      })
+      .catch(err => next(err))
   },
   getUsers: (req, res, next) => {
-    adminServices.getUsers(req, (err, data) => err ? next(err) : res.render('admin/users', data))
+    return User.findAll({
+      // 避免密碼外洩
+      attributes: { exclude: ['password'] },
+      raw: true
+    })
+      .then(users => {
+        res.render('admin/users', { users })
+      })
+      .catch(err => next(err))
   },
   patchUser: (req, res, next) => {
-    adminServices.patchUser(req, (err, data) => {
-      if (err) return next(err)
-      req.flash('success_messages', '使用者權限變更成功!')
-      req.session.editedUser = data
-      return res.redirect('/admin/users')
+    return User.findByPk(req.params.id, {
+      // 避免密碼資料外洩
+      attributes: { exclude: ['password'] }
     })
+      .then(user => {
+        // 檢查使用者是否存在
+        if (!user) throw new Error("User didn't exist!")
+        if (user.email === 'root@example.com') {
+          const err = new Error('error_messages', '禁止變更 root 使用者權限!')
+          err.status = 404
+          throw err
+        }
+        return user.update({
+          isAdmin: !user.isAdmin
+        })
+      })
+      .then(editedUser => {
+        req.flash('success_messages', '使用者權限變更成功!')
+        return res.redirect('/admin/users')
+      })
+      .catch(err => next(err))
   }
 }
 

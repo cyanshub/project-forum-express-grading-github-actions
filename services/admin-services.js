@@ -35,6 +35,13 @@ const adminServices = {
       })
       .catch(err => cb(err))
   },
+  createRestaurant: (req, cb) => {
+    return Category.findAll({
+      raw: true
+    })
+      .then(categories => cb(null, { categories }))
+      .catch(err => cb(err))
+  },
   postRestaurant: (req, cb) => {
     const { name, tel, address, openingHours, description, categoryId } = req.body
     // 因為 name 設定為必填, 故設定檢驗條件
@@ -55,19 +62,7 @@ const adminServices = {
       .then(newRestaurant => cb(null, { restaurant: newRestaurant }))
       .catch(err => cb(err))
   },
-  deleteRestaurant: (req, cb) => {
-    return Restaurant.findByPk(req.params.id)
-      .then(restaurant => {
-        if (!restaurant) {
-          const err = new Error("Restaurant didn't exist!")
-          err.status = 404
-          throw err
-        }
-        return restaurant.destroy()
-      })
-      .then(deletedRestaurant => cb(null, { restaurant: deletedRestaurant }))
-      .catch(err => cb(err))
-  },
+
   getRestaurant: (req, cb) => {
     Restaurant.findByPk(req.params.id, {
       nest: true,
@@ -80,6 +75,19 @@ const adminServices = {
       })
       .catch(err => { cb(err) })
   },
+
+  editRestaurant: (req, cb) => {
+    Promise.all([
+      Restaurant.findByPk(req.params.id, { raw: true }),
+      Category.findAll({ raw: true })
+    ])
+      .then(([restaurant, categories]) => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        cb(null, { restaurant, categories })
+      })
+      .catch(err => { cb(err) })
+  },
+
   putRestaurant: (req, cb) => {
     const { name, tel, address, openingHours, description, categoryId } = req.body
     // 因為 name 設定為必填, 故設定檢驗條件
@@ -110,6 +118,21 @@ const adminServices = {
       )
       .catch(err => cb(err))
   },
+
+  deleteRestaurant: (req, cb) => {
+    return Restaurant.findByPk(req.params.id)
+      .then(restaurant => {
+        if (!restaurant) {
+          const err = new Error("Restaurant didn't exist!")
+          err.status = 404
+          throw err
+        }
+        return restaurant.destroy()
+      })
+      .then(deletedRestaurant => cb(null, { restaurant: deletedRestaurant }))
+      .catch(err => cb(err))
+  },
+
   getUsers: (req, cb) => {
     return User.findAll({
       // 避免密碼外洩
@@ -130,8 +153,8 @@ const adminServices = {
         // 檢查使用者是否存在
         if (!user) throw new Error("User didn't exist!")
         if (user.email === 'root@example.com') {
-          const err = new Error('error_messages', '禁止變更 root 使用者權限!')
-          err.status = 404
+          const err = new Error('error_messages', '禁止變更 root 權限')
+          err.status = 403
           throw err
         }
         return user.update({

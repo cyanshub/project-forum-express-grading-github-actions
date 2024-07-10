@@ -7,6 +7,9 @@ const { filterUnique } = require('../helpers/array-helpers')
 const { User, Comment, Restaurant, Favorite, Like, Followship } = require('../models')
 
 const userServices = {
+  signUpPage: (req, cb) => {
+    return cb(null)
+  },
   signUp: (req, cb) => {
     // 核對密碼與二次輸入密碼
     if (req.body.password !== req.body.passwordCheck) {
@@ -25,6 +28,72 @@ const userServices = {
         password: hash
       }))
       .then(newUser => cb(null, { user: newUser }))
+      .catch(err => cb(err))
+  },
+  signInPage: (req, cb) => {
+    return cb(null)
+  },
+  signIn: (req, cb) => {
+    return cb(null)
+  },
+  logout: (req, cb) => {
+    return cb(null)
+  },
+
+  getUser: (req, cb) => {
+    return User.findByPk(req.params.id, {
+      attributes: { exclude: ['password'] },
+      include: [
+        { model: Comment, include: [Restaurant] },
+        { model: Restaurant, as: 'FavoritedRestaurants' },
+        { model: User, as: 'Followings', attributes: { exclude: ['password'] } }, // 訂閱別人
+        { model: User, as: 'Followers', attributes: { exclude: ['password'] } } // 粉絲
+      ]
+    })
+      .then(user => {
+        if (!user) throw new Error('使用者不存在!')
+        // 整理 user.Comments 資料
+        user.Comments = user.Comments.map(comment => ({
+          ...comment.toJSON()
+        }))
+        user = user.toJSON() // 整理 user 資料
+
+        // 使用重複值過濾演算法: 過濾掉重複的 comment.Restaurant.id
+        user.Comments = filterUnique(user.Comments, ['Restaurant', 'id'])
+
+        return cb(null, { user })
+      })
+      .catch(err => cb(err))
+  },
+  editUser: (req, cb) => {
+    return User.findByPk(req.params.id, { raw: true })
+      .then(user => {
+        if (!user) throw new Error('使用者不存在!')
+        return cb(null, { user })
+      })
+      .catch(err => cb(err))
+  },
+  putUser: (req, cb) => {
+    // 使用者只能編輯自己的資料: 比對傳入的id 與 passport的id
+    if (Number(req.params.id) !== req.user.id) throw new Error('只能編輯自己的使用者資料!')
+    const { name } = req.body
+    if (!name.trim()) throw new Error('需要輸入使用者名稱!')
+    const file = req.file // 拿取 middleware 傳過來的檔案
+    return Promise.all([
+      User.findByPk(req.params.id, {
+        attributes: { exclude: ['password'] }
+      }),
+      localFileHandler(file) // 將圖案寫入指定資料夾, 並回傳圖檔路徑
+    ])
+      .then(([user, filePath]) => {
+        // 檢查使用者是否存在
+        if (!user) throw new Error('使用者不存在!')
+        return user.update({
+          name,
+          image: filePath || user.image
+        })
+      })
+      .then(updatedUser => cb(null, { user: updatedUser }))
       .catch(err => cb(err))
   },
   addFavorite: (req, cb) => {
@@ -186,54 +255,6 @@ const userServices = {
           .sort((a, b) => b.followerCount - a.followerCount)
         return cb(null, { users: result })
       })
-      .catch(err => cb(err))
-  },
-  getUser: (req, cb) => {
-    return User.findByPk(req.params.id, {
-      attributes: { exclude: ['password'] },
-      include: [
-        { model: Comment, include: [Restaurant] },
-        { model: Restaurant, as: 'FavoritedRestaurants' },
-        { model: User, as: 'Followings', attributes: { exclude: ['password'] } }, // 訂閱別人
-        { model: User, as: 'Followers', attributes: { exclude: ['password'] } } // 粉絲
-      ]
-    })
-      .then(user => {
-        if (!user) throw new Error('使用者不存在!')
-        // 整理 user.Comments 資料
-        user.Comments = user.Comments.map(comment => ({
-          ...comment.toJSON()
-        }))
-        user = user.toJSON() // 整理 user 資料
-
-        // 使用重複值過濾演算法: 過濾掉重複的 comment.Restaurant.id
-        user.Comments = filterUnique(user.Comments, ['Restaurant', 'id'])
-
-        return cb(null, { user })
-      })
-      .catch(err => cb(err))
-  },
-  putUser: (req, cb) => {
-    // 使用者只能編輯自己的資料: 比對傳入的id 與 passport的id
-    if (Number(req.params.id) !== req.user.id) throw new Error('只能編輯自己的使用者資料!')
-    const { name } = req.body
-    if (!name.trim()) throw new Error('需要輸入使用者名稱!')
-    const file = req.file // 拿取 middleware 傳過來的檔案
-    return Promise.all([
-      User.findByPk(req.params.id, {
-        attributes: { exclude: ['password'] }
-      }),
-      localFileHandler(file) // 將圖案寫入指定資料夾, 並回傳圖檔路徑
-    ])
-      .then(([user, filePath]) => {
-        // 檢查使用者是否存在
-        if (!user) throw new Error('使用者不存在!')
-        return user.update({
-          name,
-          image: filePath || user.image
-        })
-      })
-      .then(updatedUser => cb(null, { user: updatedUser }))
       .catch(err => cb(err))
   }
 }

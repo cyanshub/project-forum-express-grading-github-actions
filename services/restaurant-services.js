@@ -81,8 +81,10 @@ const restaurantServices = {
         if (!restaurants) throw new Error("restaurants didn't exist")
         const results = restaurants.map(restaurant => ({
           ...restaurant.toJSON(), // toJSON無法針對陣列, 只能針對單個物件
-          isFavorited: req.user?.FavoritedRestaurants ? restaurant.FavoritedUsers.some(f => f.id === req.user.id) : []
+          isFavorited: req.user?.FavoritedRestaurants ? restaurant.FavoritedUsers.some(f => f.id === req.user.id) : [],
+          favoritedCount: restaurant.FavoritedUsers.length
         }))
+          .sort((a, b) => b.favoritedCount - a.favoritedCount)
         return cb(null, { restaurants: results })
       })
       .catch(err => cb(err))

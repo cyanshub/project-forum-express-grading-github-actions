@@ -4,7 +4,7 @@ const userServices = require('../../services/user-services')
 
 const userController = {
   signUp: (req, res, next) => {
-    userServices.signUp(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    userServices.signUp(req, (err, data) => err ? next(err) : res.status(200).json({ status: 'success', data }))
   },
   signIn: (req, res, next) => {
     // 利用 try catch 處理不是非同步語法的錯誤事件
@@ -17,7 +17,7 @@ const userController = {
 
       // 利用 jwt 來發 token
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-      return res.json({
+      return res.status(200).json({
         status: 'success',
         data: {
           token,
@@ -27,33 +27,6 @@ const userController = {
     } catch (err) {
       next(err)
     }
-  },
-  addFavorite: (req, res, next) => {
-    userServices.addFavorite(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  removeFavorite: (req, res, next) => {
-    userServices.removeFavorite(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  addLike: (req, res, next) => {
-    userServices.addLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  removeLike: (req, res, next) => {
-    userServices.removeLike(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  addFollowing: (req, res, next) => {
-    userServices.addFollowing(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  removeFollowing: (req, res, next) => {
-    userServices.removeFollowing(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  getTopUsers: (req, res, next) => {
-    userServices.getTopUsers(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  getUser: (req, res, next) => {
-    userServices.getUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
-  },
-  putUser: (req, res, next) => {
-    userServices.putUser(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   }
 }
 

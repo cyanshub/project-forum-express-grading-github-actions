@@ -5,3 +5,4 @@ temp/
 .env
 .idea
 mysql_db_backup
+documents/

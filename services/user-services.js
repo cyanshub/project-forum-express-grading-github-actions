@@ -66,7 +66,10 @@ const userServices = {
       .catch(err => cb(err))
   },
   editUser: (req, cb) => {
-    return User.findByPk(req.params.id, { raw: true })
+    return User.findByPk(req.params.id, {
+      raw: true,
+      attributes: { exclude: ['password'] }
+    })
       .then(user => {
         if (!user) throw new Error('使用者不存在!')
         return cb(null, { user })

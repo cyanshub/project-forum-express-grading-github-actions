@@ -7,7 +7,7 @@ const ExtractJWT = passportJWT.ExtractJwt
 
 const bcrypt = require('bcryptjs')
 
-const { User, Restaurant } = require('../models')
+const { User } = require('../models')
 
 // 設置本地的登入策略 Set up passport strategy
 passport.use(new LocalStrategy({
@@ -41,15 +41,10 @@ passport.serializeUser((user, cb) => {
 
 // 反序列化
 passport.deserializeUser((id, cb) => {
+  // 為了在 main.hbs 的 header 帶出使用者資訊, 還是要查詢資料
   // 操作資料庫, 依存放在 passport 的 id 從資料庫取出物件
   User.findByPk(id, {
-    include: [
-      // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
-      { model: Restaurant, as: 'FavoritedRestaurants' },
-      { model: Restaurant, as: 'LikedRestaurants' },
-      { model: User, as: 'Followers' }, // 關聯追蹤自己的使用者
-      { model: User, as: 'Followings' } // 關聯自己追蹤的使用者
-    ]
+    attributes: { exclude: ['password'] }
   })
     .then(user => cb(null, user.toJSON())) // 整理 sequelize 打包後的物件
     .catch(err => cb(err))
@@ -63,17 +58,14 @@ const jwtOptions = {
 
 // 設置 jwt 登入策略
 passport.use(new JWTStrategy(jwtOptions, (jwtPayload, cb) => {
-  User.findByPk(jwtPayload.id, {
-    include: [
-      // 關聯 User Model 的多對多關係 Model, 並寫上多對多關係的名稱(對應model設定的名稱)
-      { model: Restaurant, as: 'FavoritedRestaurants' },
-      { model: Restaurant, as: 'LikedRestaurants' },
-      { model: User, as: 'Followers' }, // 關聯追蹤自己的使用者
-      { model: User, as: 'Followings' } // 關聯自己追蹤的使用者
-    ]
-  })
-    .then(user => cb(null, user))
-    .catch(err => cb(err))
+  // 在同步語法捕捉可能的錯誤事件
+  try {
+    // cb vs promise, 統一成其中一種風格
+    console.log('登入的user資料', jwtPayload)
+    cb(null, jwtPayload)
+  } catch (err) {
+    cb(err)
+  }
 }))
 
 module.exports = passport

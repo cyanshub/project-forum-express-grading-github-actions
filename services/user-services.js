@@ -240,18 +240,25 @@ const userServices = {
       .catch(err => cb(err))
   },
   getTopUsers: (req, cb) => {
-    return User.findAll({
-      // 避免密碼外洩
-      attributes: { exclude: ['password'] },
-      include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }] // 取出追蹤此user的人
-    })
-      .then(users => {
+    const userAuthId = req.user.id
+    return Promise.all([
+      User.findAll({
+        // 避免密碼外洩
+        attributes: { exclude: ['password'] },
+        include: [{ model: User, as: 'Followers', attributes: { exclude: ['password'] } }] // 取出追蹤此user的人
+      }),
+      User.findByPk(userAuthId, {
+        attributes: { exclude: ['password'] },
+        include: [{ model: User, as: 'Followings' }] // 關聯自己追蹤的使用者
+      })
+    ])
+      .then(([users, userAuth]) => {
         const result = users
           // 傳入的 map 函式記得用小括號包住
           .map(user => ({
             ...user.toJSON(), // 使用展開運算子倒入 map 函式傳入的 user 屬性
             followerCount: user.Followers.length, // 傳入的使用者與其追隨自己的數量
-            isFollowed: req.user.Followings.some(f => f.id === user.id)
+            isFollowed: userAuth.Followings.some(f => f.id === user.id)
             // 判斷目前登入的使用者帳戶的追蹤者名單是否包含傳入的使用者
           }))
           // 利用.sort箭頭函式排序(a,b): 由大到小 b - a; 由小到大 a - b

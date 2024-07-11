@@ -4,6 +4,7 @@ const { getOffset, getPagination } = require('../helpers/pagination-helper')
 
 const restaurantServices = {
   getRestaurants: (req, cb) => {
+    const userAuthId = req.user.id
     const DEFAULT_LIMIT = 9 // 預設每頁顯示幾筆資料
     const categoryId = Number(req.query.categoryId) || ''
     const page = Number(req.query.page) || 1 // 預設第一頁或從query string拿資料
@@ -23,10 +24,18 @@ const restaurantServices = {
         nest: true,
         order: [['id', 'DESC']]
       }),
-      Category.findAll({ raw: true })
+      Category.findAll({ raw: true }),
+      User.findByPk(userAuthId, {
+        attributes: { exclude: ['password'] },
+        // 關聯自己按讚及收藏的案場
+        include: [
+          { model: Restaurant, as: 'FavoritedRestaurants' },
+          { model: Restaurant, as: 'LikedRestaurants' }]
+      })
     ])
-      .then(([restaurants, categories]) => {
-        const favoritedRestaurantsId = req.user?.FavoritedRestaurants ? req.user.FavoritedRestaurants.map(fr => fr.id) : []
+      .then(([restaurants, categories, userAuth]) => {
+        userAuth = userAuth.toJSON()
+        const favoritedRestaurantsId = userAuth?.FavoritedRestaurants ? userAuth.FavoritedRestaurants.map(fr => fr.id) : []
         const likedRestaurantsId = req.user?.LikedRestaurants ? req.user.LikedRestaurants.map(fr => fr.id) : []
         const data = restaurants.rows.map(r => ({
           ...r,
@@ -71,17 +80,27 @@ const restaurantServices = {
       .catch(err => cb(err))
   },
   getTopRestaurants: (req, cb) => {
-    return Restaurant.findAll({
-      // 避免密碼外洩
-      include: [{ model: User, as: 'FavoritedUsers', attributes: { exclude: ['password'] } }],
-      limit: 10, // 只取前10筆資料
-      order: [['favoriteCounts', 'DESC'], ['id', 'ASC']] // 依 favoriteCounts 降冪排列
-    })
-      .then(restaurants => {
+    const userAuthId = req.user.id
+    return Promise.all([
+      Restaurant.findAll({
+        // 避免密碼外洩
+        include: [{ model: User, as: 'FavoritedUsers', attributes: { exclude: ['password'] } }],
+        limit: 10, // 只取前10筆資料
+        order: [['favoriteCounts', 'DESC'], ['id', 'ASC']] // 依 favoriteCounts 降冪排列
+      }),
+      User.findByPk(userAuthId, {
+        attributes: { exclude: ['password'] },
+        // 關聯自己按讚及收藏的案場
+        include: [{ model: Restaurant, as: 'FavoritedRestaurants' }]
+      })
+    ])
+      .then(([restaurants, userAuth]) => {
         if (!restaurants) throw new Error("restaurants didn't exist")
+
+        userAuth = userAuth.toJSON()
         const results = restaurants.map(restaurant => ({
           ...restaurant.toJSON(), // toJSON無法針對陣列, 只能針對單個物件
-          isFavorited: req.user?.FavoritedRestaurants ? restaurant.FavoritedUsers.some(f => f.id === req.user.id) : [],
+          isFavorited: userAuth?.FavoritedRestaurants ? restaurant.FavoritedUsers.some(f => f.id === userAuthId) : [],
           favoritedCount: restaurant.FavoritedUsers.length
         }))
           .sort((a, b) => b.favoritedCount - a.favoritedCount)
